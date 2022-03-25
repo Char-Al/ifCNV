@@ -54,7 +54,7 @@ def openJson(path,n):
     tmp = os.listdir(path)
     tmp = np.array(tmp)[np.array([bool(re.findall("depths.json$",tmp[i])) for i in range(len(tmp))])]
     reads = np.zeros((n,len(tmp)))
-    amplicons = ["" for x in range(n)]
+    amplicons = ["" for _ in range(n)]
     q=0
     for p in tmp:
         with open(path+p) as json_file:
@@ -81,10 +81,10 @@ def sumLibraries(reads):
     return(reads_f)
 
 def correctIndex(reads,correspondance):
-    l = ["" for x in range(len(reads.index))]
+    l = ["" for _ in range(len(reads.index))]
     q=0
     for i in reads.index:
-        l[q] = i[(len(i)-9):len(i)]
+        l[q] = i[len(i)-9:]
         q=q+1
     final = reads[[correspondance["amplicon"][0] in l[x] for x in range(len(l))]]
     for i in correspondance["amplicon"]:
@@ -121,8 +121,7 @@ def aberrantSamples(reads,conta='auto'):
 
     clf = IsolationForest(contamination=conta).fit(random_data)
     preds = clf.predict(random_data)
-    res = np.array(reads.columns)[preds==-1]
-    return(res)
+    return np.array(reads.columns)[preds==-1]
 
 
 def aberrantAmpliconsPerSample(name,reads_norm,verbose=False):
@@ -151,8 +150,7 @@ def amplifEvalGene(reads,abSamples,gene,sample):
 
 def scoreAmplif(k,n,N,mu):
     p = n/N
-    x = np.log(1/((p**k)*(1-p)**(n-k)))*(k/n)
-    return x
+    return np.log(1/((p**k)*(1-p)**(n-k)))*(k/n)
 
 def aberrantAmpliconsFinal(reads, reads_norm, abSamples,abSamples2,run,threshold):
     f = pd.DataFrame(columns=["run","name","gene","ratio","score"])
@@ -231,7 +229,7 @@ if len(ld)>0:
             q=q+1
             res.loc[q] = [run,i,"MET","Negatif","-"]
 
-    res.to_csv(output_path+"CNV_Juno_"+run+".tsv", sep="\t",index=False)
+    res.to_csv(f'{output_path}CNV_Juno_' + run + ".tsv", sep="\t", index=False)
 
 else:
     print("Erreur. Verifier le nom du run.")
