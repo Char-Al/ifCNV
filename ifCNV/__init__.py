@@ -111,7 +111,7 @@ def generateGraph(sample, output_dir, reads, region, CNVneg):
 
 
 def getTemplate():
-    html = """
+    return """
 <!DOCTYPE html>
 <html>
   <head>
@@ -208,7 +208,6 @@ def getTemplate():
 
 </html>
     """
-    return html
 
 
 def replaceZeroes(data):
@@ -269,12 +268,11 @@ def filterReads(reads, N, regtar=None, regsamp=None):
 
 
 def normalizeReads(reads):
-    reads_norm = reads / reads.sum(axis=0)
-    return reads_norm
+    return reads / reads.sum(axis=0)
 
 
 def aberrantSamples(reads, conta='auto', verbose=True):
-    if conta != 'auto' and conta != 'none':
+    if conta not in ['auto', 'none']:
         conta = float(conta)
     if conta == 'none':
         conta = 1 / reads.shape[1]
@@ -307,9 +305,8 @@ def aberrantSamples(reads, conta='auto', verbose=True):
 
 
 def aberrantAmpliconsPerSample(name, reads_norm, CNVneg, conta=0.01):
-    if conta != 'auto':
-        if conta != 'none':
-            conta = float(conta)
+    if conta not in ['auto', 'none']:
+        conta = float(conta)
     if conta == 'none':
         conta = 1 / reads.shape[1]
     random_data = np.array(reads_norm[name])
@@ -325,8 +322,7 @@ def aberrantAmpliconsPerSample(name, reads_norm, CNVneg, conta=0.01):
 
 def scoreAmplif(k, n, N):
     p = n / N
-    x = np.log(1 / ((p**k) * (1 - p)**(n - k))) * (k / n)
-    return x
+    return np.log(1 / ((p**k) * (1 - p)**(n - k))) * (k / n)
 
 
 def amplifEvalGene(reads_norm, region, CNVneg, sample):
@@ -366,7 +362,10 @@ def aberrantAmpliconsFinal(reads, reads_norm, CNVpos, CNVneg, scoreThreshold=10,
                     f.loc[q] = [run, name, gene, amplif, score]
                     q = q + 1
     if verbose:
-        print(f"{str(f.shape[0])} aberrant regions found in {str(len(np.unique(f['Sample name'])))} samples.\n")
+        print(
+            f"{str(f.shape[0])} aberrant regions found in {len(np.unique(f['Sample name']))} samples.\n"
+        )
+
 
     return f
 
@@ -388,11 +387,10 @@ def main(args):
     # Filter the reads matrix
     filteredReads, filteredS, filteredT = filterReads(reads=reads, N=args.minReads, regtar=args.regTargets, regsamp=args.regSample)
 
-    if args.verbose:
-        if len(filteredS) > 0:
-            print("Filtered samples:")
-            for i in filteredS:
-                print(i)
+    if args.verbose and len(filteredS) > 0:
+        print("Filtered samples:")
+        for i in filteredS:
+            print(i)
 
     # Normalize the reads matrix
     normReads = normalizeReads(filteredReads)
